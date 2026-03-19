@@ -1,0 +1,419 @@
+<Window x:Class="AroniumBridge.UI.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Aronium Bridge — Configuration"
+        Width="520"
+        SizeToContent="Height"
+        MinWidth="500"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanMinimize"
+        ShowInTaskbar="True"
+        Background="{StaticResource BackgroundBrush}"
+        FontFamily="Segoe UI"
+        WindowStyle="SingleBorderWindow">
+
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo Description="Aronium Bridge — Configuration"/>
+    </Window.TaskbarItemInfo>
+
+    <Window.Resources>
+
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background"      Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="BorderBrush"     Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius"    Value="8"/>
+            <Setter Property="Padding"         Value="20,16"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#000000" BlurRadius="8"
+                                      ShadowDepth="1" Opacity="0.06"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CardHeader" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI Semibold"/>
+            <Setter Property="FontSize"   Value="10.5"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="Margin"     Value="0,0,0,12"/>
+        </Style>
+
+        <!-- Small inline button for pair actions -->
+        <Style x:Key="InlineButton" TargetType="Button">
+            <Setter Property="FontSize"        Value="11"/>
+            <Setter Property="FontFamily"      Value="Segoe UI"/>
+            <Setter Property="Height"          Value="26"/>
+            <Setter Property="Padding"         Value="10,0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid Margin="24,20,24,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>   <!-- 0  Header -->
+            <RowDefinition Height="18"/>     <!-- 1  Gap -->
+            <RowDefinition Height="Auto"/>   <!-- 2  Virtual Port Pair Manager -->
+            <RowDefinition Height="14"/>     <!-- 3  Gap -->
+            <RowDefinition Height="Auto"/>   <!-- 4  Virtual port selector card -->
+            <RowDefinition Height="14"/>     <!-- 5  Gap -->
+            <RowDefinition Height="Auto"/>   <!-- 6  Hardware card -->
+            <RowDefinition Height="16"/>     <!-- 7  Gap -->
+            <RowDefinition Height="Auto"/>   <!-- 8  Status -->
+            <RowDefinition Height="20"/>     <!-- 9  Gap -->
+            <RowDefinition Height="Auto"/>   <!-- 10 Save button -->
+        </Grid.RowDefinitions>
+
+        <!-- ═══════════════════════════
+             ROW 0 — HEADER
+        ═══════════════════════════ -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Width="44" Height="44"
+                    CornerRadius="10" Background="{StaticResource AccentBrush}">
+                <Border.Effect>
+                    <DropShadowEffect Color="#1E88E5" BlurRadius="10"
+                                      ShadowDepth="2" Opacity="0.5"/>
+                </Border.Effect>
+                <TextBlock Text="&#x1F4E1;" FontSize="22"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Border>
+
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                <TextBlock x:Name="TxtWindowTitle"
+                           Text="Aronium Bridge"
+                           FontFamily="Segoe UI Semibold"
+                           FontSize="18"
+                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock x:Name="TxtWindowSubtitle"
+                           Text="Configure virtual COM ports and pole display."
+                           FontSize="12"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="0,2,0,0"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════════════
+             ROW 2 — VIRTUAL PORT PAIR MANAGER
+             Shown when com0com is installed.
+             Allows creating/removing pairs without opening
+             the com0com setup GUI.
+        ═══════════════════════════════════════════════════ -->
+        <Border x:Name="PairManagerCard"
+                Grid.Row="2"
+                Style="{StaticResource Card}">
+            <StackPanel>
+
+                <!-- Header row with title + refresh button -->
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="VIRTUAL PORT PAIR MANAGER  (com0com)"
+                               Style="{StaticResource CardHeader}"
+                               Margin="0"
+                               VerticalAlignment="Center"/>
+
+                    <Button x:Name="BtnRefreshPairs"
+                            Grid.Column="1"
+                            Content="↻  Refresh"
+                            Style="{StaticResource InlineButton}"
+                            Background="Transparent"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            Foreground="{StaticResource TextSecondaryBrush}"
+                            Click="BtnRefreshPairs_Click"/>
+                </Grid>
+
+                <!-- Status when com0com not installed -->
+                <Border x:Name="PanelNotInstalled"
+                        Background="#FFF7ED"
+                        BorderBrush="#FED7AA"
+                        BorderThickness="1"
+                        CornerRadius="5"
+                        Padding="12,10"
+                        Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock FontSize="11"
+                                   FontFamily="Segoe UI Semibold"
+                                   Foreground="#92400E"
+                                   Text="com0com is not installed"
+                                   Margin="0,0,0,4"/>
+                        <TextBlock FontSize="11"
+                                   Foreground="#78350F"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,10">
+                            com0com is a free driver that creates virtual COM port pairs.
+                            Click the button below to download and install it automatically.
+                            You will see one Windows security prompt — click <Run FontWeight="SemiBold">Yes</Run>
+                            to allow the driver installation. No other steps required.
+                        </TextBlock>
+
+                        <!-- Progress bar (hidden until download starts) -->
+                        <ProgressBar x:Name="InstallProgress"
+                                     Height="6"
+                                     Minimum="0" Maximum="100"
+                                     Visibility="Collapsed"
+                                     Margin="0,0,0,8"/>
+                        <TextBlock x:Name="TxtInstallStatus"
+                                   FontSize="10.5"
+                                   Foreground="#92400E"
+                                   Visibility="Collapsed"
+                                   Margin="0,0,0,8"
+                                   TextWrapping="Wrap"/>
+
+                        <Button x:Name="BtnInstallCom0Com"
+                                Content="⬇  Download &amp; Install com0com"
+                                FontSize="11"
+                                FontFamily="Segoe UI Semibold"
+                                Height="30"
+                                Padding="14,0"
+                                HorizontalAlignment="Left"
+                                Background="#D97706"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Click="BtnInstallCom0Com_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Existing pairs list -->
+                <StackPanel x:Name="PanelPairsInstalled">
+
+                    <!-- Pairs list -->
+                    <StackPanel x:Name="PairsList" Margin="0,0,0,12"/>
+
+                    <!-- "No pairs" message -->
+                    <TextBlock x:Name="TxtNoPairs"
+                               Text="No virtual port pairs installed yet."
+                               FontSize="11"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="0,0,0,12"
+                               Visibility="Collapsed"/>
+
+                    <!-- Divider -->
+                    <Rectangle Height="1"
+                               Fill="{StaticResource BorderBrush}"
+                               Margin="0,0,0,12"/>
+
+                    <!-- Create new pair row -->
+                    <TextBlock Text="Create new pair:"
+                               FontFamily="Segoe UI Semibold"
+                               FontSize="11"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="0,0,0,8"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Port A input -->
+                        <TextBox x:Name="TxtNewPortA"
+                                 Grid.Column="0"
+                                 Style="{StaticResource ModernTextBox}"
+                                 Text="COM3"
+                                 ToolTip="First port of the pair (Aronium reads here)"/>
+
+                        <!-- Arrow -->
+                        <TextBlock Grid.Column="2"
+                                   Text="↔"
+                                   FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+
+                        <!-- Port B input -->
+                        <TextBox x:Name="TxtNewPortB"
+                                 Grid.Column="4"
+                                 Style="{StaticResource ModernTextBox}"
+                                 Text="COM4"
+                                 ToolTip="Second port of the pair (AroniumBridge reads here)"/>
+
+                        <!-- Create button -->
+                        <Button x:Name="BtnCreatePair"
+                                Grid.Column="6"
+                                Content="＋  Create"
+                                Style="{StaticResource InlineButton}"
+                                Background="{StaticResource AccentBrush}"
+                                BorderBrush="{StaticResource AccentBrush}"
+                                Foreground="White"
+                                Click="BtnCreatePair_Click"/>
+                    </Grid>
+
+                    <!-- Pair operation feedback -->
+                    <Border x:Name="PairFeedbackBorder"
+                            Margin="0,10,0,0"
+                            CornerRadius="4"
+                            Padding="10,6"
+                            Visibility="Collapsed">
+                        <TextBlock x:Name="TxtPairFeedback"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
+                </StackPanel>
+
+            </StackPanel>
+        </Border>
+
+        <!-- ═══════════════════════════
+             ROW 4 — VIRTUAL PORT SELECTOR
+        ═══════════════════════════ -->
+        <Border Grid.Row="4" Style="{StaticResource Card}">
+            <StackPanel>
+
+                <TextBlock Text="VIRTUAL COM PORT  (com0com READ END)"
+                           Style="{StaticResource CardHeader}"/>
+
+                <TextBlock Style="{StaticResource FieldLabel}"
+                           Text="Virtual COM Port (the end AroniumBridge reads from)"/>
+
+                <ComboBox x:Name="CboVirtualPort"
+                          Style="{StaticResource ModernComboBox}"
+                          DropDownOpened="CboVirtualPort_DropDownOpened"
+                          ToolTip="The com0com port paired with COM4 (set in Aronium Customer Display)."/>
+
+                <TextBlock Margin="0,8,0,0"
+                           FontSize="11"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           TextWrapping="Wrap">
+                    In Aronium:
+                    <Run FontFamily="Consolas">Settings → Hardware → Customer Display</Run>
+                    → select the <Run FontWeight="SemiBold">other</Run> port of the pair, characters: 20, enable.
+                </TextBlock>
+
+            </StackPanel>
+        </Border>
+
+        <!-- ═══════════════════════════
+             ROW 6 — HARDWARE CARD
+        ═══════════════════════════ -->
+        <Border Grid.Row="6" Style="{StaticResource Card}">
+            <StackPanel>
+
+                <TextBlock Text="HARDWARE — PDLED8 SERIAL PORT"
+                           Style="{StaticResource CardHeader}"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="14"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="COM Port (PDLED8)"
+                                   Style="{StaticResource FieldLabel}"/>
+                        <ComboBox x:Name="CboComPort"
+                                  Style="{StaticResource ModernComboBox}"
+                                  DropDownOpened="CboComPort_DropDownOpened"
+                                  ToolTip="The COM port the physical PDLED8 is connected to."/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Baud Rate"
+                                   Style="{StaticResource FieldLabel}"/>
+                        <ComboBox x:Name="CboBaudRate"
+                                  Style="{StaticResource ModernComboBox}"
+                                  ToolTip="PDLED8 default is 2400 baud."/>
+                    </StackPanel>
+                </Grid>
+
+                <Rectangle Height="12"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="14"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="14"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Data Bits" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox x:Name="CboDataBits" Style="{StaticResource ModernComboBox}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Parity" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox x:Name="CboParity" Style="{StaticResource ModernComboBox}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Stop Bits" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox x:Name="CboStopBits" Style="{StaticResource ModernComboBox}"/>
+                    </StackPanel>
+                </Grid>
+
+            </StackPanel>
+        </Border>
+
+        <!-- ═══════════════════════════
+             ROW 8 — STATUS
+        ═══════════════════════════ -->
+        <Border x:Name="StatusBorder"
+                Grid.Row="8"
+                CornerRadius="6"
+                Padding="12,8"
+                Visibility="Collapsed">
+            <TextBlock x:Name="TxtStatus"
+                       FontSize="12.5"
+                       TextWrapping="Wrap"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"/>
+        </Border>
+
+        <!-- ═══════════════════════════
+             ROW 10 — SAVE BUTTON
+        ═══════════════════════════ -->
+        <Button x:Name="BtnSave"
+                Grid.Row="10"
+                Content="&#x1F4BE;  Save &amp; Restart Service"
+                Style="{StaticResource PrimaryButton}"
+                MinWidth="230"
+                HorizontalAlignment="Center"
+                Click="BtnSave_Click"/>
+
+    </Grid>
+</Window>
