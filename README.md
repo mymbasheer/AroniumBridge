@@ -4,7 +4,7 @@ Aronium Bridge is a Windows utility designed to bridge the **Aronium POS Custome
 
 It simplifies the complex task of setting up `com0com` virtual port pairs, ensuring that data sent by Aronium to a virtual port is seamlessly forwarded to your physical hardware via RS232.
 
-![System Check Screenshot](DiagnosticScreenshot.png) *(Placeholder for your screenshot)*
+![System Check Screenshot](diagnostic_screenshot.png)
 
 ## 🚀 Features
 
