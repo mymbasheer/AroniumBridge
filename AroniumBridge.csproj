@@ -32,11 +32,8 @@
       <_AppIcoPath>$(MSBuildProjectDirectory)\app.ico</_AppIcoPath>
     </PropertyGroup>
     <!-- Only write if missing — fast no-op on subsequent builds -->
-    <Exec
-      Condition="!Exists('$(_AppIcoPath)')"
-      Command="powershell.exe -NoProfile -NonInteractive -Command &quot;[System.IO.File]::WriteAllBytes('$(_AppIcoPath)', [System.Convert]::FromBase64String('$(AppIconBase64)'))&quot;"
-      ConsoleToMSBuild="true"/>
-    <Message Text="app.ico ready." Importance="normal"/>
+    <Exec Condition="!Exists('$(_AppIcoPath)')" Command="powershell.exe -NoProfile -NonInteractive -Command &quot;[System.IO.File]::WriteAllBytes('$(_AppIcoPath)', [System.Convert]::FromBase64String('$(AppIconBase64)'))&quot;" ConsoleToMSBuild="true" />
+    <Message Text="app.ico ready." Importance="normal" />
   </Target>
 
   <ItemGroup>
@@ -46,7 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.IO.Ports" Version="10.0.3" />
+    <PackageReference Include="System.IO.Ports" Version="10.0.5" />
   </ItemGroup>
 
 </Project>
